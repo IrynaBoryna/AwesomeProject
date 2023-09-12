@@ -24,18 +24,22 @@ export const RegisterForm = () => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-
+  const [codeWord, setCodeWord] = useState("Показати");
   const navigation = useNavigation();
 
   const shownPassword = () => {
-    console.log(password);
+    if (codeWord === "Показати") {
+      setCodeWord("Скрити");
+    } else {
+      setCodeWord("Показати");
+    }
   };
 
   const onRegister = () => {
     console.log(`${login} + ${password} + ${email}`);
     setLogin("");
     setEmail("");
-    setEmail("");
+    setPassword("");
     navigation.navigate("Home");
   };
 
@@ -92,35 +96,42 @@ export const RegisterForm = () => {
                   />
                   <View style={styles.inputPasswordBox}>
                     <TextInput
+                        secureTextEntry={codeWord === "Показати" ? true : false}
                       value={password}
                       onChangeText={setPassword}
                       placeholder="Пароль"
-                      style={styles.inputPassword}
-                      secureTextEntry={true}
+                      style={{
+                        ...styles.inputPassword,
+                        borderColor: onFocus ? "#FF6C00" : "#E8E8E8",
+                      }}
                       onFocus={() => setIsShownKeyboard(true)}
                     />
                     <TouchableOpacity
-                      activeOpacity={0.7} onPress={shownPassword}
+                      activeOpacity={0.7}
+                      onPress={shownPassword}
                       style={styles.inputLink}
                     >
-                      <Text style={styles.link} >
-                        Показати
-                      </Text>
+                      <Text style={styles.link}>{codeWord}</Text>
                     </TouchableOpacity>
                   </View>
 
-                  <TouchableOpacity activeOpacity={0.7} style={styles.button} onPress={onRegister}>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    style={styles.button}
+                    onPress={onRegister}
+                  >
                     <View>
-                      <Text style={styles.titleButton}>
-                        Зареєструватися
-                      </Text>
+                      <Text style={styles.titleButton}>Зареєструватися</Text>
                     </View>
                   </TouchableOpacity>
 
-                  <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate("Login")}>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => navigation.navigate("Login")}
+                  >
                     <Text style={styles.link}>
                       Вже є акаунт?
-                      <Text style={{ textDecorationLine: "underline" }}>          
+                      <Text style={{ textDecorationLine: "underline" }}>
                         Увійти
                       </Text>
                     </Text>
@@ -214,6 +225,7 @@ const styles = StyleSheet.create({
   },
   inputPasswordBox: {
     flexDirection: "row",
+    justifyContent: "flex-end",
     alignItems: "center",
     borderRadius: 8,
     border: "solid",
@@ -222,6 +234,7 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   inputPassword: {
+    position: "absolute",
     minWidth: 325,
     height: 50,
     paddingLeft: 16,
@@ -233,10 +246,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   inputLink: {
-    // position: "absolute",
-    // zIndex: 5,
-    right: "100%",
-    width: 80,
+    position: "relative",
     height: 50,
     justifyContent: "center",
   },

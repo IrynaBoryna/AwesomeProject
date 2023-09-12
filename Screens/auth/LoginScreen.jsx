@@ -23,40 +23,32 @@ const initialState = {
 
 export const LoginForm = () => {
   [isShownKeyboard, setIsShownKeyboard] = useState(false);
+  [inputFocus, setInputFocus] = useState(false);
 
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
 
   const navigation = useNavigation();
-
-  const [type, setType] = useState("password");
   const [codeWord, setCodeWord] = useState("Показати");
 
-  const shownPassword = (e) => {
-    console.log(password);
-   
-    // // e.target.value=  setPassword
-    // //   TextInput.value = { password };
-    //   if (type === "password") {
-    //       setCodeWord("Скрити");
-    //      TextInput.target.value.password={password}
-    //       setPassword(password)
-        // setType({password});
-    //   } else {
-    //     setCodeWord("Показати");
-    //     setType("password");
-    //   }
+
+  const shownPassword = () => {
+    if (codeWord === "Показати") {
+      setCodeWord("Скрити");
+    } else {
+      setCodeWord("Показати");
+    }
   };
 
   const onFocusInput = () => {
     setIsShownKeyboard(true);
-    style = { ...styles.inputPassword, borderColor: "#FF6C00" };
+    setInputFocus(true);
   };
 
   const onLogin = () => {
     console.log(`${password} + ${email}`);
     setEmail("");
-    setEmail("");
+    setPassword("");
     navigation.navigate("Home");
   };
 
@@ -101,9 +93,8 @@ export const LoginForm = () => {
                   />
                   <View style={styles.inputPasswordBox}>
                     <TextInput
+                      secureTextEntry={codeWord === "Показати" ? true : false}
                       value={password}
-                      type={password}
-                      secureTextEntry={true}
                       onChangeText={setPassword}
                       placeholder="Пароль"
                       style={{
@@ -114,11 +105,10 @@ export const LoginForm = () => {
                     />
                     <TouchableOpacity
                       activeOpacity={0.7}
-                      style={styles.inputLink}
                       onPress={shownPassword}
                     >
                       <View>
-                        <Text style={styles.link} > {codeWord} </Text>
+                        <Text style={styles.link}> {codeWord} </Text>
                       </View>
                     </TouchableOpacity>
                   </View>
@@ -221,24 +211,20 @@ const styles = StyleSheet.create({
   },
   inputPasswordBox: {
     flexDirection: "row",
+    justifyContent: "flex-end",
     alignItems: "center",
-    resizeMode: "cover",
     borderRadius: 8,
     border: "solid",
     width: 325,
     marginBottom: 43,
     paddingRight: 16,
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: "#E8E8E8",
-    backgroundColor: "#F6F6F6",
   },
   inputPassword: {
-    minWidth: 235,
+    position: "absolute",
+    minWidth: 325,
     height: 50,
     paddingLeft: 16,
-    // borderWidth: 1,
-    borderRightWidth: 0,
+    borderWidth: 1,
     borderRadius: 8,
     borderColor: "#E8E8E8",
     backgroundColor: "#F6F6F6",
@@ -246,10 +232,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   inputLink: {
-    // position: "absolute",
-    // zIndex: 5,
-    // right: "100%",
-    width: 80,
+    position: "relative",
     height: 50,
     justifyContent: "center",
   },
