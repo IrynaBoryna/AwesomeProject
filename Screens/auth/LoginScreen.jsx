@@ -21,7 +21,7 @@ const initialState = {
   password: "",
 };
 
-export const LoginForm = () => {
+export const LoginForm = ({login}) => {
   [isShownKeyboard, setIsShownKeyboard] = useState(false);
   [inputFocus, setInputFocus] = useState(false);
 
@@ -47,9 +47,10 @@ export const LoginForm = () => {
 
   const onLogin = () => {
     console.log(`${password} + ${email}`);
+     navigation.navigate("Home", {email, login });
     setEmail("");
     setPassword("");
-    navigation.navigate("Home");
+  
   };
 
   return (
@@ -124,7 +125,7 @@ export const LoginForm = () => {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={() => navigation.navigate("Registration")}
+                    onPress={() => navigation.navigate("Registration", {login, email})}
                   >
                     <Text style={styles.link}>
                       Немає акаунту?
@@ -193,7 +194,7 @@ const styles = StyleSheet.create({
     fontWeight: 400,
   },
   input: {
-    width: 325,
+    width: "100%",
     height: 50,
     paddingLeft: 16,
     marginBottom: 16,
@@ -215,13 +216,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 8,
     border: "solid",
-    width: 325,
+    width: "100%",
     marginBottom: 43,
-    paddingRight: 16,
+    marginTop: 16,
   },
   inputPassword: {
     position: "absolute",
-    minWidth: 325,
+    width: "100%",
     height: 50,
     paddingLeft: 16,
     borderWidth: 1,
@@ -235,5 +236,6 @@ const styles = StyleSheet.create({
     position: "relative",
     height: 50,
     justifyContent: "center",
+    paddingRight: 16,
   },
 });

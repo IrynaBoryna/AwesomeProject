@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect, useRef} from "react";
 import {
   StyleSheet,
   View,
@@ -13,46 +13,98 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { Feather , EvilIcons} from "@expo/vector-icons";
+import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
+import * as Location from "expo-location";
+
 
 export const CreatePostsScreen = () => {
+  [isShownKeyboard, setIsShownKeyboard] = useState(false);
+    const [hasPermission, setHasPermission] = useState(null);
   const [name, setName] = useState("");
   const [map, setMap] = useState("");
+  const [photo, setPhoto] = useState("");
+  const [camera, setCamera] = useState(null);
+  const [location, setLocation] = useState(null);
 
-  [isShownKeyboard, setIsShownKeyboard] = useState(false);
+   const [type, setType] = useState(Camera.Constants.Type.back);
+ 
+  // useEffect(() => {
+  //   (async () => {
+  //     const { status } = await Camera.requestCameraPermissionsAsync();
+  //     await MediaLibrary.requestPermissionsAsync();
+  //     setHasPermission(status === "granted");   
+  //   })();
+  // }, []);
+
+  // if (hasPermission === null) {
+  //   return <View />;
+  // }
+  // if (hasPermission === false) {
+  //   return <Text>No access to camera</Text>;
+  // }
+
+  const takePhoto = async () => {
+    if (camera) {
+      const photoIm = await camera.takePictureAsync();
+        setPhoto(photoIm.uri);  
+    }
+  }
 
   const navigation = useNavigation();
-  const onPublic = () => {
-    console.log(`${name} + ${map}`);
-    navigation.navigate("Home");
-  };
 
+    const onPublic = async () => {
+      console.log(`${name} + ${map}`);
+       let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          console.log("Permission to access location was denied");
+        }
+       let location = await Location.getCurrentPositionAsync({});
+       const coords = {
+         latitude: location.coords.latitude,
+         longitude: location.coords.longitude,
+       };
+       setLocation(coords);
+      navigation.navigate("DefaultScreen", {name, map, photo, coords});
+      onReset();
+  };
+  
+  const onReset = () => {
+     setPhoto("");
+     setName("");
+     setMap("");
+     setCamera(null);
+  }
+  
   return (
     <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View
-          style={{
-            flex: 1,
-            position: "relative",
-            bottom: 0,
-            paddingHorizontal: 16,
-            // alignItems: "flex-end",
-            justifyContent: "flex-end",
-            backgroundColor: "#FFF",
-          }}
-        >
+        <View style={styles.container}>
           <KeyboardAvoidingView
             behavior={Platform.OS == "ios" ? "padding" : "height"}
           >
             <View style={styles.contentBlock}>
-              <View style={styles.imageContainer}>
-                <Image
-                  source={require("../../images/GroupPhoto.png")}
-                  style={{ width: 60, height: 60 }}
-                />
-              </View>
-              <View>
-                <Text style={styles.titleContentBlock}>Завантажте фото</Text>
-              </View>
+              <Camera style={styles.imageContainer} type={type} ref={setCamera}>
+                <Image style={styles.photo} source={photo.uri} />
+                <TouchableOpacity style={styles.btnPhoto} onPress={takePhoto}>
+                  <Image
+                    style={styles.btnPhoto}
+                    source={require("../../images/GroupPhoto.png")}
+                  />
+                </TouchableOpacity>
+              </Camera>
+
+              {!photo && (
+                <View>
+                  <Text style={styles.titleContentBlock}>Завантажте фото</Text>
+                </View>
+              )}
+              {photo && (
+                <View>
+                  <Text style={styles.titleContentBlock}>Редагувати фото</Text>
+                </View>
+              )}
             </View>
             <TextInput
               value={name}
@@ -62,14 +114,7 @@ export const CreatePostsScreen = () => {
               onFocus={() => setIsShownKeyboard(true)}
             />
             <View style={styles.mapBox}>
-              <TouchableOpacity
-                // onPress={() => navigation.navigate("MapScreen")}
-              >
-                <Image
-                  source={require("../../images/map-pin.png")}
-                  style={{ width: 24, height: 24 }}
-                />
-              </TouchableOpacity>
+              <Feather name="map-pin" size={24} color="#8D8D8D" />
               <TextInput
                 value={map}
                 onChangeText={setMap}
@@ -81,21 +126,22 @@ export const CreatePostsScreen = () => {
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={onPublic}
-              style={{
-                ...styles.button,
-                marginBottom: isShownKeyboard ? 154 : 80,
-              }}
+             style = {styles.button}
+            //  if ({photo}) {style = {{ ...styles.button, backgroundColor="#FFC600" }}} 
+              
+              
             >
               <View>
                 <Text style={styles.titleButton}>Опублікувати</Text>
               </View>
             </TouchableOpacity>
-            <View style={styles.trash}>
-              <Image
-                source={require("../../images/trash.png")}
-                style={{ width: 70, height: 40 }}
+              <Feather
+                name="trash-2"
+                size={24}
+                color="#FFFFFF"              
+                style={styles.buttonReset}
+                onPress={onReset}
               />
-            </View>
           </KeyboardAvoidingView>
         </View>
       </TouchableWithoutFeedback>
@@ -103,14 +149,15 @@ export const CreatePostsScreen = () => {
   );
 };
 const styles = StyleSheet.create({
-  // container: {
-  //   flex: 1,
-  //   position: "relative",
-  //   height: "100%",
-  //   alignItems: "center",
-  //   justifyContent: "center",
-  //   backgroundColor: "#FFF",
-  // },
+  container: {
+    flex: 1,
+    marginTop: 32,
+    position: "relative",
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   contentBlock: {
     marginTop: 32,
     marginBottom: 32,
@@ -123,23 +170,25 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    width: 325,
+    width: "100%",
     height: 51,
     padding: 10,
     marginTop: 32,
-    marginBottom: 80,
+    marginBottom: 50,
     borderRadius: 100,
     backgroundColor: "#F6F6F6",
-    border: "solid",
+    // border: "solid",
     justifyContent: "center",
     alignItems: "center",
     alignContent: "center",
   },
+
   titleButton: {
     color: "#8D8D8D",
     fontSize: 16,
     fontWeight: 400,
   },
+
   inputName: {
     width: 325,
     height: 50,
@@ -159,7 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderColor: "#E8E8E8",
     backgroundColor: "#F6F6F6",
-    width: 340,
+    width: "100%",
     height: 240,
     marginBottom: 8,
 
@@ -171,8 +220,6 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     paddingBottom: 16,
     paddingTop: 16,
-    // borderBottomWidth: 1,
-    // borderBottomColor: "#E8E8E8",
     color: "#212121",
     shadowColor: "#8D8D8D",
     fontSize: 16,
@@ -186,10 +233,29 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#E8E8E8",
   },
-  trash: {
-    height: 40,
-    // justifyContent: "end",
-    alignItems: "center",
+
+  photo: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 8,
+  },
+  btnPhoto: {
+    // width: 60, height: 60,
+    backgroundColor: "transparent",
+  },
+  buttonReset: {
+    width: 100,
+    height: 51,
+    padding: 10,
+    marginLeft: "auto",
+    marginRight: "auto",
     marginBottom: 0,
+    // marginBottom: 80,
+    borderRadius: 100,
+    backgroundColor: "#F6F6F6",
+    // justifyContent: "center",
+    // alignItems: "center",
+    alignContent: "center",
+    textAlign: "center",
   },
 });

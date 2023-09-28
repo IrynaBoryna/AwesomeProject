@@ -37,10 +37,10 @@ export const RegisterForm = () => {
 
   const onRegister = () => {
     console.log(`${login} + ${password} + ${email}`);
+      navigation.navigate("Home", { login, email });
     setLogin("");
     setEmail("");
     setPassword("");
-    navigation.navigate("Home");
   };
 
   return (
@@ -66,7 +66,7 @@ export const RegisterForm = () => {
                 <View
                   style={{
                     ...styles.form,
-                    marginBottom: isShownKeyboard ? 130 : 45,
+                    marginBottom: isShownKeyboard ? 160 : 45,
                   }}
                 >
                   <View style={styles.avatarContainer}>
@@ -127,7 +127,7 @@ export const RegisterForm = () => {
 
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => navigation.navigate("Login")}
+                    onPress={() => navigation.navigate("Login", {login, email})}
                   >
                     <Text style={styles.link}>
                       Вже є акаунт?
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     fontWeight: 400,
   },
   input: {
-    width: 325,
+    width: "100%",
     height: 50,
     paddingLeft: 16,
     marginBottom: 16,
@@ -229,13 +229,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 8,
     border: "solid",
-    width: 325,
+    width: "100%",
     marginBottom: 43,
-    paddingRight: 16,
   },
   inputPassword: {
     position: "absolute",
-    minWidth: 325,
+    width: "100%",
     height: 50,
     paddingLeft: 16,
     borderWidth: 1,
@@ -249,5 +248,6 @@ const styles = StyleSheet.create({
     position: "relative",
     height: 50,
     justifyContent: "center",
+    paddingRight: 16,
   },
 });
